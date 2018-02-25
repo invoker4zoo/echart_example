@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=5zQ9nwYR2PShtg3XHWEFDp9yGAy1E6vb"></script>
+    <!-- 引入 ECharts -->
+    <script src="./dist/echarts.min.js"></script>
+    <!-- 引入百度地图扩展 -->
+    <script src="./dist/extension/bmap.min.js"></script>
+    <script src="js/jquery.js" type="text/javascript"></script>
+</head>
+<body>
+<h2>站点热力</h2>
+<div id="echart" style="width:1400px;height:800px"></div>
+<h2>随机热力</h2>
+<div id="echart-1" style="width:1400px;height:800px"></div>
+<h2>叠加热力</h2>
+<div id="echart-2" style="width:1400px;height:800px"></div>
+</body>
+<script>
+    myChart = echarts.init(document.getElementById('echart'))
+    myChart_1 = echarts.init(document.getElementById('echart-1'))
+    myChart_2 = echarts.init(document.getElementById('echart-2'))
+
+    function arr_add(arr_1,arr_2) {
+        var newArr = []
+        for (var i=0;i<arr_1.length;i++){
+            newArr.push([arr_1[i][0],arr_1[i][1],arr_1[i][2]+arr_2[i][2]])
+        }
+        return newArr
+    }
+
+    function generate_range_point(arr) {
+        var newArr = []
+
+        for(var i=0;i<132;i++){
+            for(var j=0;j<132;j++){
+                newArr.push([106.373000 + i * 0.0025, 29.423 + j * 0.0025, 0])
+            }
+        }
+        for(var k=0;k<arr.length;k++){
+            var row = Math.floor((arr[k][0] - 106.373000)/0.0025)
+            var col = Math.floor((arr[k][1] - 29.423)/0.0025)
+            if(132*row+col<132*132&&132*row+col>=0){
+                newArr[132*row+col][2] += arr[k][2]
+            }
+
+        }
+        return newArr
+    }
+    $.when(
+        $.get('static/data/stationUnion.json'),
+        $.get('static/data/randomPoints.json')
+    ).done(function(data,data_1){
+        data = data[0]
+        data_1 = data_1[0]
+        var points=[]
+        for (var station in data){
+            points.push([data[station]['location'][0], data[station]['location'][1],data[station]['count']])
+        }
+        var _points = generate_range_point(points)
+        myChart.setOption(option = {
+            animation: false,
+            bmap: {
+                // center: [120.13066322374, 30.240018034923],
+                center:[106.573957,29.617738],
+                zoom: 12,
+                roam: true,
+                mapStyle:{
+                    'style':'grayscale'
+                }
+            },
+            visualMap: {
+                show: false,
+                top: 'top',
+                min: 0,
+                max: 10,
+                seriesIndex: 0,
+                calculable: true,
+                inRange: {
+                    color: ['blue', 'blue', 'green', 'yellow', 'red']
+                }
+            },
+            series: [{
+                type: 'heatmap',
+                coordinateSystem: 'bmap',
+                data: _points,
+                pointSize: 5,
+                blurSize: 6
+            }]
+        });
+        myChart_1.setOption(option = {
+            animation: false,
+            bmap: {
+                // center: [120.13066322374, 30.240018034923],
+                center:[106.573957,29.617738],
+                zoom: 12,
+                roam: true,
+                mapStyle:{
+                    'style':'grayscale'
+                }
+            },
+            visualMap: {
+                show: false,
+                top: 'top',
+                min: 0,
+                max: 10,
+                seriesIndex: 0,
+                calculable: true,
+                inRange: {
+                    color: ['blue', 'blue', 'green', 'yellow', 'red']
+                }
+            },
+            series: [{
+                type: 'heatmap',
+                coordinateSystem: 'bmap',
+                data: data_1,
+                pointSize: 5,
+                blurSize: 6
+            }]
+        });
+        var points_2 = arr_add(_points,data_1)
+        myChart_2.setOption(option = {
+            animation: false,
+            bmap: {
+                // center: [120.13066322374, 30.240018034923],
+                center:[106.573957,29.617738],
+                zoom: 12,
+                roam: true,
+                mapStyle:{
+                    'style':'grayscale'
+                }
+            },
+            visualMap: {
+                show: false,
+                top: 'top',
+                min: 0,
+                max: 10,
+                seriesIndex: 0,
+                calculable: true,
+                inRange: {
+                    color: ['blue', 'blue', 'green', 'yellow', 'red']
+                }
+            },
+            series: [{
+                type: 'heatmap',
+                coordinateSystem: 'bmap',
+                data: points_2,
+                pointSize: 5,
+                blurSize: 6
+            }]
+        });
+    })
+
+
+
+
+
+
+
+    // $.get('static/data/stationUnion.json', function (data) {
+    //
+    //     for (var station in data){
+    //         points.push([data[station]['location'][0], data[station]['location'][1],data[station]['count']])
+    //     }
+    //     const _points = generate_range_point(points)
+    //     myChart.setOption(option = {
+    //         animation: false,
+    //         bmap: {
+    //             // center: [120.13066322374, 30.240018034923],
+    //             center:[106.573957,29.617738],
+    //             zoom: 12,
+    //             roam: true,
+    //             mapStyle:{
+    //                 'style':'grayscale'
+    //             }
+    //         },
+    //         visualMap: {
+    //             show: false,
+    //             top: 'top',
+    //             min: 0,
+    //             max: 10,
+    //             seriesIndex: 0,
+    //             calculable: true,
+    //             inRange: {
+    //                 color: ['blue', 'blue', 'green', 'yellow', 'red']
+    //             }
+    //         },
+    //         series: [{
+    //             type: 'heatmap',
+    //             coordinateSystem: 'bmap',
+    //             data: _points,
+    //             pointSize: 5,
+    //             blurSize: 6
+    //         }]
+    //     });
+    //
+    // }),
+    //     $.get('static/data/randomPoints.json', function (data) {
+    //         const points_1=data
+    //         myChart_1.setOption(option = {
+    //             animation: false,
+    //             bmap: {
+    //                 // center: [120.13066322374, 30.240018034923],
+    //                 center:[106.573957,29.617738],
+    //                 zoom: 12,
+    //                 roam: true,
+    //                 mapStyle:{
+    //                     'style':'grayscale'
+    //                 }
+    //             },
+    //             visualMap: {
+    //                 show: false,
+    //                 top: 'top',
+    //                 min: 0,
+    //                 max: 10,
+    //                 seriesIndex: 0,
+    //                 calculable: true,
+    //                 inRange: {
+    //                     color: ['blue', 'blue', 'green', 'yellow', 'red']
+    //                 }
+    //             },
+    //             series: [{
+    //                 type: 'heatmap',
+    //                 coordinateSystem: 'bmap',
+    //                 data: points_1,
+    //                 pointSize: 5,
+    //                 blurSize: 6
+    //             }]
+    //         });
+    //
+    //     })
+
+</script>
+</html>

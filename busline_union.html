@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=5zQ9nwYR2PShtg3XHWEFDp9yGAy1E6vb"></script>
+    <!-- 引入 ECharts -->
+    <script src="./dist/echarts.min.js"></script>
+    <!-- 引入百度地图扩展 -->
+    <script src="./dist/extension/bmap.min.js"></script>
+    <script src="js/jquery.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="echart" style="width:1400px;height:800px"></div>
+</body>
+<script>
+    var url = 'static/data/lineUnion.json'
+    $.get(url, function (data) {
+        var linedata = data;
+        var planePath = 'path://M268.601,18.375c0,0,14.496,0,18.005,0 		\
+c31.325,0,59.155,0,59.155,0c6.701,0,12.14,5.238,12.14,11.695v17.872c-24.507,0-44.374,19.859-44.374,44.351 		\
+c0,24.492,19.86,44.351,44.374,44.351V335.99c-24.507,0.006-44.374,19.857-44.374,44.357c0,24.484,19.86,44.344,44.374,44.352 		\
+v25.26c0,6.457-5.431,11.695-12.14,11.695H200.158c-12.013,0-19.527-7.781-19.527-19.084c0,0,0-351.215,0-365.378 		\
+s18.736-42.622,44.1-53.734C238.303,17.658,268.601,18.375,268.601,18.375z M202.818,387.729v39.918 		\
+c0,6.531,5.29,11.828,11.821,11.828h35.426c6.531,0,11.814-5.297,11.814-11.828v-39.918H202.818z M202.818,321.199v51.746h59.053 		\
+v-51.746H202.818z M202.818,254.904v51.518h59.053v-51.518H202.818z M202.818,188.413v51.517h59.053v-51.517H202.818z 		 \
+M202.818,121.882v51.746h59.053v-51.746H202.818z M289.658,121.904c-3.037,0-5.497,3.311-5.497,7.396 		\
+c0,4.086,2.46,7.389,5.497,7.389h10.978c3.037,0,5.497-3.303,5.497-7.389c0-4.085-2.46-7.396-5.497-7.396H289.658z M237.38,43.472 		c-20.229,4.766-34.562,30.897-34.562,38.145c0,17.754,0,25.475,0,25.475h59.053l0.03-66.094 		C261.901,40.998,253.641,39.653,237.38,43.472z M328.326,380.348c0-16.328,13.247-29.568,29.59-29.568 		\
+c16.335,0,29.582,13.24,29.582,29.568c0,16.334-13.247,29.566-29.582,29.566C341.573,409.914,328.326,396.682,328.326,380.348z 		 M328.326,92.286c0-16.328,13.247-29.567,29.59-29.567c16.335,0,29.582,13.239,29.582,29.567c0,16.335-13.247,29.574-29.582,29.574 		C341.573,121.86,328.326,108.621,328.326,92.286z  '
+
+
+        var myChart = echarts.init(document.getElementById('echart'))
+        var option = {
+            bmap:{
+                center: [106.567058,29.559446],
+                zoom: 13,
+                roam: true,
+                mapStyle:{
+                    'style': 'grayscale'
+                    // 'styleJson': [
+                    //     {
+                    //         'featureType': 'water',
+                    //         'elementType': 'all',
+                    //         'stylers': {
+                    //             'color': '#031628'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'land',
+                    //         'elementType': 'geometry',
+                    //         'stylers': {
+                    //             'color': '#000102'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'highway',
+                    //         'elementType': 'all',
+                    //         'stylers': {
+                    //             'visibility': 'off'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'arterial',
+                    //         'elementType': 'geometry.fill',
+                    //         'stylers': {
+                    //             'color': '#000000'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'arterial',
+                    //         'elementType': 'geometry.stroke',
+                    //         'stylers': {
+                    //             'color': '#0b3d51'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'local',
+                    //         'elementType': 'geometry',
+                    //         'stylers': {
+                    //             'color': '#000000'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'railway',
+                    //         'elementType': 'geometry.fill',
+                    //         'stylers': {
+                    //             'color': '#000000'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'railway',
+                    //         'elementType': 'geometry.stroke',
+                    //         'stylers': {
+                    //             'color': '#08304b'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'subway',
+                    //         'elementType': 'geometry',
+                    //         'stylers': {
+                    //             'lightness': -100
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'building',
+                    //         'elementType': 'geometry.fill',
+                    //         'stylers': {
+                    //             'color': '#000000'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'all',
+                    //         'elementType': 'labels.text.fill',
+                    //         'stylers': {
+                    //             'color': '#857f7f'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'all',
+                    //         'elementType': 'labels.text.stroke',
+                    //         'stylers': {
+                    //             'color': '#000000'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'building',
+                    //         'elementType': 'geometry',
+                    //         'stylers': {
+                    //             'color': '#022338'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'green',
+                    //         'elementType': 'geometry',
+                    //         'stylers': {
+                    //             'color': '#062032'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'boundary',
+                    //         'elementType': 'all',
+                    //         'stylers': {
+                    //             'color': '#465b6c'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'manmade',
+                    //         'elementType': 'all',
+                    //         'stylers': {
+                    //             'color': '#022338'
+                    //         }
+                    //     },
+                    //     {
+                    //         'featureType': 'label',
+                    //         'elementType': 'all',
+                    //         'stylers': {
+                    //             'visibility': 'off'
+                    //         }
+                    //     }
+                    // ]
+                }
+
+            },
+            series:[{
+                type: 'lines',
+                coordinateSystem: 'bmap',
+                polyline: true,
+                data: linedata,
+                silent: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.2,
+                        width: 2
+                    }
+                },
+                progressiveThreshold: 500,
+                progressive: 100
+            }, {
+                type: 'lines',
+                coordinateSystem: 'bmap',
+                polyline: true,
+                data: linedata,
+                lineStyle: {
+                    normal: {
+                        width: 0.08
+                    }
+                },
+                effect: {
+                    constantSpeed: 20,
+                    show: true,
+                    trailLength: 0,
+                    symbolSize: 10,
+                    symbol: planePath,
+                },
+                zlevel: 1
+            }]
+        }
+        myChart.setOption(option)
+    });
+
+</script>

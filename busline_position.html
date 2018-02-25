@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>获取公交站点坐标</title>
+    <style type="text/css">
+        html,body{ height: 100%;}
+        #results,#coordinate{ display: inline-block; width: 45%; min-height: 200px; border:1px solid #e4e4e4; vertical-align: top;}
+    </style>
+    <script src="http://api.map.baidu.com/api?v=1.3" type="text/javascript"></script>
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+<p><label for="busId">公交线路：</label><input type="text" value="521" id="busId" /><input type="button" id="btn-search" value="查询" /></p>
+<p id="results"></p>
+<p id="coordinate"></p>
+<script type="text/javascript">
+    (function(){
+        var tempVar;
+        var busline = new BMap.BusLineSearch('重庆',{
+            renderOptions:{panel:"results"},
+            onGetBusListComplete: function(result){
+                if(result) {
+                    tempVar = result;//此时的结果并不包含坐标信息，所以getCoordinate函数不能在此调用。通过跟踪变量，坐标是在onGetBusListComplete之后才被百度的包添加进来的
+                    busline.getBusLine(result.getBusListItem(0));
+                }
+            },
+            // api文档中一共有四个回调，除了onGetBusListComplete和onBusLineHtmlSet之外，还有onBusListHtmlSet和onGetBusLineComplete，
+            // 经过测试只有在onBusLineHtmlSet这一步（线路格式化完毕）的时候，才会将坐标添加到tempVar中
+            // 所以上面busline.getBusLine(result.getBusListItem(0));是必须的，不然没有办法获得坐标列表
+            onBusLineHtmlSet : function(){
+                try{
+                    getCoordinate(tempVar);
+                }catch(e){
+                }
+            }
+        });
+        function getCoordinate(result){
+            var coordinate = document.getElementById("coordinate");
+            // 得到站点信息
+            var stations = result['0']._stations;
+            // 得到路线坐标信息
+            var points = result['0']._polyline.points;
+            // 文件名
+            var fileName = document.getElementById("busId").value.toString + '.json'
+            // var _stations = []
+            // var _linePoints = []
+            // for ()
+            var busLineData = {
+                'stations':stations,
+                'linePoints':points
+            }
+            var data = {
+                'data':busLineData,
+                'busLine':document.getElementById("busId").value
+            }
+            // // 保存json文件
+            // try {
+            //     var fso = new ActiveXObject("Scripting.FileSystemObject")
+            //     var tf = fso.OpenTextFile("/home/showlove/coda/ui/sb-admin-test/startbootstrap-sb-admin-1.0.4/busdata/" + fileName,2, true)
+            //     tf.write('test')
+            // }
+            // catch(err){console.log(err)}
+            // finally {tf.close()}
+            // console.log(busLineData)
+            // 发送get请求
+            var url =  "http://127.0.0.1:8000/save/businfo?data=" + JSON.stringify(busLineData) + '&' + 'busLine=' + document.getElementById("busId").value
+            // var get = createXMLHttpRequest();
+            // // get.onreadystatechange = checkFun;
+            // get.open("GET",url,true);
+            // get.setRequestHeader("Content-Type",
+            //     "pplication/text;chartset=UTF-8;");
+            // get.send()
+            // $.get(url,function (data) {
+            //     alert(data)
+            // })
+            $.ajax({
+                url:url,
+                type:"GET",
+                dataType:'JSONP',
+                success: function (result) {
+                    alert(result)
+                }
+
+            })
+
+            var html = [];
+            stations.forEach(function(item){
+                html.push('<li>' + item.name + ' ' + item.position.lng + ' ' + item.position.lat + '</li>');
+            });
+            // coordinate.innerHTML = '<ul>' + html.join('') + '</ul>';
+            coordinate.innerHTML = JSON.stringify(busLineData)
+        };
+        //回调函数
+        // function checkFun(){
+        //     if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+        //         var b = xmlHttpRequest.responseText;
+        //         if(b == "OK"){
+        //             alert("发送成功！");
+        //         }else{
+        //             alert("发送失败！");
+        //         }
+        //     }
+        // };
+        function createXMLHttpRequest() {
+            var xmlHttp;
+            if (window.XMLHttpRequest) {
+                xmlHttp = new XMLHttpRequest();
+                if (xmlHttp.overrideMimeType)
+                    xmlHttp.overrideMimeType('text/xml');
+            } else if (window.ActiveXObject) {
+                try {
+                    xmlHttp = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (e) {
+                    try {
+                        xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) {
+                    }
+                }
+            }
+            return xmlHttp;
+        };
+        const getBusline = function (id) {
+            busline.getBusList(id)
+        };
+
+        document.getElementById('btn-search').onclick = function () {
+            const id = document.getElementById('busId').value;
+            getBusline(id)
+        };
+
+        function range(start, end) {
+            var arr = []
+            for( var i=start;i<=end;i++){
+                arr.push(i)
+            }
+            return arr
+        };
+
+        const tasks = range(100, 999);
+
+        document.getElementById('btn-search-all').onclick = function searchAllAsync () {
+            var t = window.setInterval(function(){
+                if (tasks.length > 0) {
+                    document.getElementById('busId').value = tasks[0]
+                    getBusline(tasks[0]);
+                    tasks.shift()
+                }else {
+                    console.log('No tasks left.');
+                    window.clearInterval(t)
+                }
+            },1000)
+        }
+
+    })();
+
+</script>
+</body>
+</html>
